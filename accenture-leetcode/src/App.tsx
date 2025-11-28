@@ -167,9 +167,11 @@ const App: React.FC = () => {
                     </div>
                 )}
                 
-                <footer className="mt-16 text-center text-gray-600 text-xs font-mono uppercase tracking-widest">
-                    System Version 1.0.3 // Accenture_Prep // Developed by VedeshP <br/>
-                    // SOME FIXES COMING SOON... STAY TUNED
+                <footer className="mt-16 text-center text-gray-400 text-xs font-mono uppercase tracking-widest">
+                    System Version 1.0.3 <br /> Accenture_Prep <br /> Developed by <a href='https://github.com/VedeshP' className='bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 
+text-transparent bg-clip-text
+' target='_blank'>VedeshP</a> <br/>
+                    SOME FIXES COMING SOON... STAY TUNED
                 </footer>
             </main>
         </div>
