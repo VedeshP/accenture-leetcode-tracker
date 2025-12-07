@@ -8,13 +8,38 @@ import ProblemTable from './components/ProblemTable';
 const parseCSV = (csv: string): Problem[] => {
     const lines = csv.trim().split('\n');
     const problems: Problem[] = [];
-    
+
+    const splitCSVLine = (line: string): string[] => {
+        const result: string[] = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                // Handle escaped double-quotes inside quoted field
+                if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+                    cur += '"';
+                    i++; // skip escaped quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === ',' && !inQuotes) {
+                result.push(cur);
+                cur = '';
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur);
+        return result.map(s => s.trim());
+    };
+
     // Starting from 1 to skip header row
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
 
-        const values = line.split(',');
+        const values = splitCSVLine(line);
 
         // Safety check: Ensure we have enough columns (Diff, Title, Freq, Acc, Link, Topics...)
         if (values.length < 5) {
@@ -25,12 +50,11 @@ const parseCSV = (csv: string): Problem[] => {
         // 1. Handle Difficulty: Convert "MEDIUM" -> "Medium" to match Enum
         const rawDiff = values[0].trim().toUpperCase();
         let difficulty: Difficulty;
-        
+
         if (rawDiff === 'EASY') difficulty = Difficulty.Easy;
         else if (rawDiff === 'MEDIUM') difficulty = Difficulty.Medium;
         else if (rawDiff === 'HARD') difficulty = Difficulty.Hard;
         else {
-            // Fallback for Title Case or other variations
             const normalized = rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
             if (Object.values(Difficulty).includes(normalized as Difficulty)) {
                 difficulty = normalized as Difficulty;
@@ -42,7 +66,7 @@ const parseCSV = (csv: string): Problem[] => {
 
         const title = values[1].replace(/^"|"$/g, '');
         const frequency = parseFloat(values[2]);
-        
+
         // 2. Handle Acceptance Rate: Convert 0.537... -> 53.7
         let acceptanceRate = parseFloat(values[3]);
         if (acceptanceRate <= 1) {
@@ -50,17 +74,15 @@ const parseCSV = (csv: string): Problem[] => {
         }
 
         const link = values[4].replace(/^"|"$/g, '');
-        
-        // 3. Handle Topics: "Math, Brainteaser"
-        // Re-join the rest of the array (in case topics were split by comma)
+
+        // 3. Handle Topics: everything after column 5
         const topicsRaw = values.slice(5).join(',');
-        // Remove surrounding quotes and split by comma
         const topics = topicsRaw
             .replace(/^"|"$/g, '') // remove outer quotes
             .split(',')
             .map(t => t.trim())
             .filter(t => t.length > 0);
-        
+
         problems.push({
             difficulty,
             title,
@@ -168,10 +190,8 @@ const App: React.FC = () => {
                 )}
                 
                 <footer className="mt-16 text-center text-gray-400 text-xs font-mono uppercase tracking-widest">
-                    System Version 1.0.3 <br /> Accenture_Prep <br /> Developed by <a href='https://github.com/VedeshP' className='bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 
-text-transparent bg-clip-text
-' target='_blank'>VedeshP</a> <br/>
-                    SOME FIXES COMING SOON... STAY TUNED
+                    System Version 1.0.4 <br /> Accenture_Prep <br /> Developed by <a href='https://github.com/VedeshP' className='bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 text-transparent bg-clip-text' target='_blank'>VedeshP</a> <br/>
+                    UPDATES COMING SOON... STAY TUNED
                 </footer>
             </main>
         </div>

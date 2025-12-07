@@ -23,11 +23,13 @@ const ProblemTable: React.FC<ProblemTableProps> = ({ problems, solvedProblemLink
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
-    // Extract all unique tags from problems
+    // Extract all unique tags from problems and count occurrences
     const allTags = useMemo(() => {
-        const tags = new Set<string>();
-        problems.forEach(p => p.topics.forEach(t => tags.add(t)));
-        return Array.from(tags).sort();
+        const tags = new Map<string, number>();
+        problems.forEach(p => p.topics.forEach(t => tags.set(t, (tags.get(t) ?? 0) + 1)));
+        return Array.from(tags.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([tag, count]) => ({ tag, count }));
     }, [problems]);
 
     const handleSort = (key: SortKey) => {
@@ -93,29 +95,35 @@ const ProblemTable: React.FC<ProblemTableProps> = ({ problems, solvedProblemLink
                     <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">
                         Filter by Topic
                     </div>
-                    {selectedTags.size > 0 && (
-                        <button 
-                            onClick={() => setSelectedTags(new Set())}
-                            className="text-xs text-brand-blue hover:text-white transition-colors"
-                        >
-                            Clear All
-                        </button>
-                    )}
+                    <div className="flex items-center gap-4">
+                        {selectedTags.size > 0 && (
+                            <div className="text-xs text-gray-400">Matching: <span className="text-white font-mono">{sortedAndFilteredProblems.length}</span></div>
+                        )}
+                        {selectedTags.size > 0 && (
+                            <button 
+                                onClick={() => setSelectedTags(new Set())}
+                                className="text-xs text-brand-blue hover:text-white transition-colors"
+                            >
+                                Clear All
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    {allTags.map(tag => {
+                    {allTags.map(({ tag, count }) => {
                         const isSelected = selectedTags.has(tag);
                         return (
                             <button
                                 key={tag}
                                 onClick={() => toggleTag(tag)}
-                                className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wide rounded-md border transition-all duration-200
+                                className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wide rounded-md border transition-all duration-200 flex items-center gap-2
                                     ${isSelected 
                                         ? 'bg-brand-blue text-white border-brand-blue shadow-[0_0_10px_rgba(37,99,235,0.3)]' 
                                         : 'bg-gray-950 text-gray-400 border-gray-800 hover:border-gray-600 hover:text-gray-200'
                                     }`}
                             >
-                                {tag}
+                                <span>{tag}</span>
+                                <span className="text-[10px] font-mono text-gray-500">{count}</span>
                             </button>
                         );
                     })}
