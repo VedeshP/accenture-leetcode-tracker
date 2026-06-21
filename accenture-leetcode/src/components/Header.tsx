@@ -1,5 +1,5 @@
 import React from 'react';
-import { companies, companyHref, type CompanyId, withBase } from '../constants';
+import { companies, companiesList, companyHref, type CompanyId, withBase } from '../constants';
 
 type HeaderProps = {
     companyId: CompanyId;
@@ -52,8 +52,11 @@ const Header: React.FC<HeaderProps> = ({ companyId }) => {
                             onChange={onCompanyChange}
                             className="bg-gray-900 text-xs font-mono text-gray-200 uppercase outline-none"
                         >
-                            <option value="accenture">Accenture</option>
-                            <option value="jpmc">JPMC</option>
+                            {companiesList.map((companyOption) => (
+                                <option key={companyOption.id} value={companyOption.id}>
+                                    {companyOption.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
